@@ -1,7 +1,4 @@
 import tensorflow as tf
-import numpy as np
-from idnns.networks.utils import _convert_string_dtype
-
 
 def conv2d(x, W):
 	"""conv2d returns a 2d convolution layer with full stride."""
@@ -24,28 +21,6 @@ def bias_variable(shape):
 	"""bias_variable generates a bias variable of a given shape."""
 	initial = tf.constant(0.1, shape=shape)
 	return tf.Variable(initial)
-
-
-def set_value(x, value):
-	"""Sets the value of a variable, from a Numpy array.
-	# Arguments
-		x: Tensor to set to a new value.
-		value: Value to set the tensor to, as a Numpy array
-			(of the same shape).
-	"""
-	value = np.asarray(value)
-	tf_dtype = _convert_string_dtype(x.dtype.name.split('_')[0])
-	if hasattr(x, '_assign_placeholder'):
-		assign_placeholder = x._assign_placeholder
-		assign_op = x._assign_op
-	else:
-		assign_placeholder = tf.placeholder(tf_dtype, shape=value.shape)
-		assign_op = x.assign(assign_placeholder)
-		x._assign_placeholder = assign_placeholder
-		x._assign_op = assign_op
-	session = tf.get_default_session()
-	session.run(assign_op, feed_dict={assign_placeholder: value})
-
 
 def variable_summaries(var):
 	"""Attach a lot of summaries to a Tensor (for TensorBoard visualization)."""

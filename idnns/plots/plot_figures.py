@@ -201,13 +201,8 @@ def plot_animation(name_s, save_name):
     f, (axes) = plt.subplots(2, 1)
     f.subplots_adjust(left=0.14, bottom=0.1, right=.928, top=0.94, wspace=0.13, hspace=0.55)
     colors = LAYERS_COLORS
-    #new/old version
-    if False:
-        Ix = np.squeeze(data[0,:,-1,-1, :, :])
-        Iy = np.squeeze(data[1,:,-1,-1, :, :])
-    else:
-        Ix = np.squeeze(data[0, :, -1, -1, :, :])[np.newaxis,:,:]
-        Iy = np.squeeze(data[1, :, -1, -1, :, :])[np.newaxis,:,:]
+    Ix = np.squeeze(data[0, :, -1, -1, :, :])[np.newaxis,:,:]
+    Iy = np.squeeze(data[1, :, -1, -1, :, :])[np.newaxis,:,:]
     #Interploation of the samplings (because we don't cauclaute the infomration in each epoch)
     interp_data_x = interp1d(epochsInds,  Ix, axis=1)
     interp_data_y = interp1d(epochsInds,  Iy, axis=1)

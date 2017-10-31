@@ -204,23 +204,6 @@ def get_data(name):
 		d2['information'] = data / normalization_factor
 	return d2
 
-
-def load_reverese_annealing_data(name, max_beta=300, min_beta=0.8, dt=0.1):
-	"""Load mat file of the reverse annealing data with the give params"""
-	with open(name + '.mat', 'rb') as handle:
-		d = sio.loadmat(name + '.mat')
-		F = d['F']
-		ys = d['y']
-		PXs = np.ones(len(F)) / len(F)
-		f_PYs = np.mean(ys)
-	PYs = np.array([f_PYs, 1 - f_PYs])
-	PYX = np.concatenate((np.array(ys)[None, :], 1 - np.array(ys)[None, :]))
-	mybetaS = 2 ** np.arange(np.log2(min_beta), np.log2(max_beta), dt)
-	mybetaS = mybetaS[::-1]
-	PTX0 = np.eye(PXs.shape[0])
-	return mybetaS, np.squeeze(PTX0), np.squeeze(PXs), np.squeeze(PYX), np.squeeze(PYs)
-
-
 def get_data(name):
 	"""Load data from the given name"""
 	gen_data = {}

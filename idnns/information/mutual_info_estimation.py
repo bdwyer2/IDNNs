@@ -4,7 +4,6 @@ import sys
 import tensorflow as tf
 from idnns.networks import model as mo
 import contextlib
-import idnns.information.entropy_estimators as ee
 
 @contextlib.contextmanager
 def printoptions(*args, **kwargs):
@@ -14,51 +13,6 @@ def printoptions(*args, **kwargs):
 		yield
 	finally:
 		np.set_printoptions(**original)
-
-
-def optimiaze_func(s, diff_mat, d, N):
-	diff_mat1 = (1. / (np.sqrt(2. * np.pi) * (s ** 2) ** (d / 2.))) * np.exp(-diff_mat / (2. * s ** 2))
-	np.fill_diagonal(diff_mat1, 0)
-	diff_mat2 = (1. / (N - 1)) * np.sum(diff_mat1, axis=0)
-	diff_mat3 = np.sum(np.log2(diff_mat2), axis=0)
-	return -diff_mat3
-
-
-def calc_all_sigams(data, sigmas):
-	batchs = 128
-	num_of_bins = 8
-	# bins = np.linspace(-1, 1, num_of_bins).astype(np.float32)
-	# bins = stats.mstats.mquantiles(np.squeeze(data.reshape(1, -1)), np.linspace(0,1, num=num_of_bins))
-	# data = bins[np.digitize(np.squeeze(data.reshape(1, -1)), bins) - 1].reshape(len(data), -1)
-
-	batch_points = np.rint(np.arange(0, data.shape[0] + 1, batchs)).astype(dtype=np.int32)
-	I_XT = []
-	num_of_rand = min(800, data.shape[1])
-	for sigma in sigmas:
-		# print sigma
-		I_XT_temp = 0
-		for i in range(0, len(batch_points) - 1):
-			new_data = data[batch_points[i]:batch_points[i + 1], :]
-			rand_indexs = np.random.randint(0, new_data.shape[1], num_of_rand)
-			new_data = new_data[:, :]
-			N = new_data.shape[0]
-			d = new_data.shape[1]
-			diff_mat = np.linalg.norm(((new_data[:, np.newaxis, :] - new_data)), axis=2)
-			# print diff_mat.shape, new_data.shape
-			s0 = 0.2
-			# DOTO -add leaveoneout validation
-			res = minimize(optimiaze_func, s0, args=(diff_mat, d, N), method='nelder-mead',
-			               options={'xtol': 1e-8, 'disp': False, 'maxiter': 6})
-			eta = res.x
-			diff_mat0 = - 0.5 * (diff_mat / (sigma ** 2 + eta ** 2))
-			diff_mat1 = np.sum(np.exp(diff_mat0), axis=0)
-			diff_mat2 = -(1.0 / N) * np.sum(np.log2((1.0 / N) * diff_mat1))
-			I_XT_temp += diff_mat2 - d * np.log2((sigma ** 2) / (eta ** 2 + sigma ** 2))
-			# print diff_mat2 - d*np.log2((sigma**2)/(eta**2+sigma**2))
-		I_XT_temp /= len(batch_points)
-		I_XT.append(I_XT_temp)
-	sys.stdout.flush()
-	return I_XT
 
 
 def estimate_IY_by_network(data, labels, from_layer=0):
@@ -141,15 +95,12 @@ def calc_varitional_information(data, labels, model_path, layer_numer, num_of_la
 	if search_sigma:
 		sigmas = np.linspace(0.2, 10, 20)
 		sigmas = [0.2]
-
 	else:
 		sigmas = [sigma]
-	if False:
-		I_XT = calc_all_sigams(data_x, sigmas)
-	else:
-		I_XT = 0
-	if estimate_y_by_network:
 
+	I_XT = 0
+
+	if estimate_y_by_network:
 		I_TY, acc = estimate_IY_by_network(data, labels, from_layer=layer_numer)
 	else:
 		I_TY = 0
@@ -167,12 +118,3 @@ def calc_varitional_information(data, labels, model_path, layer_numer, num_of_la
 	params['local_IXT'] = I_XT
 	params['local_ITY'] = I_TY
 	return params
-
-def estimate_Information(Xs, Ys, Ts):
-	"""Estimation of the MI from missing data based on k-means clustring"""
-	estimate_IXT = ee.mi(Xs, Ts)
-	estimate_IYT = ee.mi(Ys, Ts)
-	# estimate_IXT1 = ee.mi(Xs, Ts)
-	# estimate_IYT1 = ee.mi(Ys, Ts)
-	return estimate_IXT, estimate_IYT
-

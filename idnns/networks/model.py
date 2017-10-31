@@ -1,7 +1,5 @@
 import functools
-import tensorflow as tf
 import numpy as np
-from idnns.networks.utils import _convert_string_dtype
 from idnns.networks.models import multi_layer_perceptron
 from idnns.networks.models import deepnn
 from idnns.networks.ops import *
@@ -141,70 +139,3 @@ class Model:
 	@property
 	def save_file(self):
 		return self._save_file
-
-	def inference(self, data):
-		"""Return the predication of the network with the given data"""
-		with tf.Session() as sess:
-			self.saver.restore(sess, './' + self.save_file)
-			feed_dict = {self.x: data}
-			pred = sess.run(self.prediction, feed_dict=feed_dict)
-		return pred
-
-	def inference_default(self, data):
-		session = tf.get_default_session()
-		feed_dict = {self.x: data}
-		pred = session.run(self.prediction, feed_dict=feed_dict)
-		return pred
-
-	def get_layer_with_inference(self, data, layer_index, epoch_index):
-		"""Return the layer activation's values with the results of the network"""
-		with tf.Session() as sess:
-			self.savers[epoch_index].restore(sess, './' + self.save_file + str(epoch_index))
-			feed_dict = {self.hidden_layers[layer_index]: data[:, 0:self.hidden_layers[layer_index]._shape[1]]}
-			pred, layer_values = sess.run([self.prediction, self.hidden_layers[layer_index]], feed_dict=feed_dict)
-		return pred, layer_values
-
-	def calc_layer_values(self, X, layer_index):
-		"""Return the layer's values"""
-		with tf.Session() as sess:
-			self.savers[-1].restore(sess, './' + self.save_file)
-			feed_dict = {self.x: X}
-			layer_values = sess.run(self.hidden_layers[layer_index], feed_dict=feed_dict)
-		return layer_values
-
-	def update_weights_and_calc_values_temp(self, d_w_i_j, layer_to_perturbe, i, j, X):
-		"""Update the weights of the given layer cacl the output and return it to the original values"""
-		if layer_to_perturbe + 1 >= len(self.hidden_layers):
-			scope_name = 'softmax_linear'
-		else:
-			scope_name = "hidden" + str(layer_to_perturbe)
-		weights = get_scope_variable(scope_name, "weights", shape=None, initializer=None)
-		session = tf.get_default_session()
-		weights_values = weights.eval(session=session)
-		weights_values_pert = weights_values
-		weights_values_pert[i, j] += d_w_i_j
-		set_value(weights, weights_values_pert)
-		feed_dict = {self.x: X}
-		layer_values = session.run(self.hidden_layers[layer_to_perturbe], feed_dict=feed_dict)
-		set_value(weights, weights_values)
-		return layer_values
-
-	def update_weights(self, d_w0, layer_to_perturbe):
-		"""Update the weights' values of the given layer"""
-		weights = get_scope_variable("hidden" + str(layer_to_perturbe), "weights", shape=None, initializer=None)
-		session = tf.get_default_session()
-		weights_values = weights.eval(session=session)
-		set_value(weights, weights_values + d_w0)
-
-	def get_wights_size(self, layer_to_perturbe):
-		"""Return the size of the given layer"""
-		weights = get_scope_variable("hidden" + str(layer_to_perturbe), "weights", shape=None, initializer=None)
-		return weights._initial_value.shape[1].value, weights._initial_value.shape[0].value
-
-	def get_layer_input(self, layer_to_perturbe, X):
-		"""Return the input of the given layer for the given data"""
-		session = tf.get_default_session()
-		inputs = self.inputs[layer_to_perturbe]
-		feed_dict = {self.x: X}
-		layer_values = session.run(inputs, feed_dict=feed_dict)
-		return layer_values

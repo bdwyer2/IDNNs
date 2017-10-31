@@ -1,7 +1,6 @@
 import _pickle as cPickle
 import multiprocessing
 import os
-import sys
 import numpy as np
 from joblib import Parallel, delayed
 import idnns.networks.network as nn
