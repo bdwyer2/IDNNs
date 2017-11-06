@@ -22,7 +22,7 @@ This file has command-line arguments as follow -
  - `learning_rate` - The learning rate of the network
  - `num_repeat` - The number of times to run the network
  - `num_epochs` - maximum number of epochs for training
- - `net_arch` - The architecture of the networks
+z
  - `per_data` - The percent of the training data
  - `name` - The name for saving the results
  - `data_name` - The dataset name

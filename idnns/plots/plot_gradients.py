@@ -8,8 +8,7 @@ import tkinter as tk
 from tkinter import filedialog
 from numpy import linalg as LA
 import os
-import sys
-import statsmodels
+
 colors = ['red', 'c', 'blue', 'green', 'orange', 'purple']
 
 
@@ -17,8 +16,8 @@ def plot_gradients(name_s=None, data_array=None, figures_dir=''):
     """Plot the gradients and the means of the networks over the batches"""
     if data_array == None:
         data_array= plt_ut.get_data(name_s[0][0])
-    #plot_loss_figures(data_array, xlim = [0, 7000] )
-    #The gradients - the diemnstions are #epochs X #Batchs # Layers
+    # plot_loss_figures(data_array, xlim = [0, 7000] )
+    # The gradients - the diemnstions are #epochs X #Batchs # Layers
     conv_net = False
     if conv_net:
         gradients =data_array['var_grad_val'][0][0][0]
@@ -29,17 +28,17 @@ def plot_gradients(name_s=None, data_array=None, figures_dir=''):
         gradients = np.squeeze(data_array['var_grad_val'])[:, :, :]
         num_of_epochs,num_of_batchs,  num_of_layers = gradients.shape
         num_of_layers = int(num_of_layers / 2)
-    #The indxes where we sampled the network
-    print (np.squeeze(data_array['var_grad_val'])[0,0].shape)
+    # The indexes where we sampled the network
+    print(np.squeeze(data_array['var_grad_val'])[0,0].shape)
     epochsInds = (data_array['params']['epochsInds']).astype(np.int)
-    #The norms of the layers
-    #l2_norm = calc_weights_norms(data_array['ws_all'])
+    # The norms of the layers
+    # l2_norm = calc_weights_norms(data_array['ws_all'])
     f_log, axes_log, f_norms, axes_norms, f_snr,  axes_snr,axes_gaus, f_gaus = create_figs()
     p_1, p_0,  sum_y ,p_3, p_4= [], [], [], [], []
     # Go over the layers
     cov_traces_all,means_all = [],[]
     all_gradients = np.empty(num_of_layers, dtype=np.object)
-    #print np.squeeze(data_array['var_grad_val']).shape
+    # print np.squeeze(data_array['var_grad_val']).shape
     for layer in range(0,num_of_layers):
         # The traces of the covarince and the means of the gradients for the current layer
         # Go over all the epochs
@@ -53,7 +52,7 @@ def plot_gradients(name_s=None, data_array=None, figures_dir=''):
             # the average vector over the batchs - this is vector in the size of #output weights
             # We averged over the batchs - It's mean vector of the batchs!
             average_vec = np.mean(gradients_current_epoch_and_layer, axis=0)
-            # The sqrt of the sum over all the weights of the squares of the gradinets -  Sqrt of AA^T - This is a number
+            # The sqrt of the sum over all the weights of the squares of the gradinets - Sqrt of AA^T - This is a number
             gradients_mean = LA.norm(average_vec)
             # The covarince matrix is in the size of #output weights X #output weights
             sum_covs_mat = np.zeros((average_vec.shape[0], average_vec.shape[0]))
@@ -62,15 +61,15 @@ def plot_gradients(name_s=None, data_array=None, figures_dir=''):
             for batch_index in range(num_of_batchs):
                 # This is in the size of the #output weights
                 current_vec = gradients_current_epoch_and_layer[batch_index, :] - average_vec
-                # The outer product of the current gradinet of the weights (in this specipic batch) with the transpose of it -
+                # The outer product of the current gradient of the weights (in this specific batch) with the transpose of it -
                 # give a matrix in the size of # output weights X # output weights
                 current_cov_mat = np.einsum('i,j', current_vec, current_vec)
-                #current_cov_mat = np.dot(current_vec[:,None], current_vec[None,:])
+                #bcurrent_cov_mat = np.dot(current_vec[:,None], current_vec[None,:])
                 # Sum the covarince matrixes over the batchs
                 sum_covs_mat+=current_cov_mat
-            #Take the mean of the cov matrix over the batchs  - The size is #output weights X # output weights
+            # Take the mean of the cov matrix over the batchs  - The size is #output weights X # output weights
             mean_cov_mat = sum_covs_mat / num_of_batchs
-            #The trace of the mean of the cov matrix - a number
+            # The trace of the mean of the cov matrix - a number
             trac_cov = np.sqrt(np.trace(mean_cov_mat))
             means.append(gradients_mean)
             cov_traces.append(trac_cov)
@@ -111,7 +110,7 @@ def plot_gradients(name_s=None, data_array=None, figures_dir=''):
         c_p0,= axes_log.plot(epochsInds[:], y_mean,  linewidth = 2,color = colors[layer])
         c_p3,= axes_snr.plot(epochsInds[:],snr,  linewidth = 2,color = colors[layer])
         c_p4,= axes_gaus.plot(epochsInds[:],np.log(1+snr),  linewidth = 2,color = colors[layer])
-        #For the legend
+        # For the legend
         p_0.append(c_p0), p_1.append(c_p1),sum_y.append(y_mean) , p_3.append(c_p3), p_4.append(c_p4)
     plt_ut.adjust_axes(axes_log, axes_norms, p_0, p_1, f_log, f_norms, axes_snr, f_snr, p_3, axes_gaus, f_gaus, p_4,
                        directory_name=figures_dir)
@@ -119,11 +118,11 @@ def plot_gradients(name_s=None, data_array=None, figures_dir=''):
 
 
 def calc_mean_var_loss(epochsInds,loss_train):
-    #Loss train is in dimension # epochs X #batchs
+    # Loss train is in dimension # epochs X #batchs
     num_of_epochs = loss_train.shape[0]
-    #Average over the batchs
+    # Average over the batches
     loss_train_mean = np.mean(loss_train,1)
-    #The diff divided by the sampled indexes
+    # The diff divided by the sampled indexes
     d_mean_loss_to_dt = np.sqrt(np.abs(np.diff(loss_train_mean) / np.diff(epochsInds[:])))
     var_loss = []
     #Go over the epochs

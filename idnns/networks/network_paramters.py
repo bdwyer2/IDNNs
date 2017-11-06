@@ -112,7 +112,7 @@ def get_default_parser(num_of_samples=None):
 
 
 def select_network_arch(type_net):
-	"""Selcet the architectures of the networks according to their type
+	"""Select the architectures of the networks according to their type
 	we can choose also costume network for example type_net=[size_1, size_2, size_3]"""
 	if type_net == '1':
 		layers_sizes = [[10, 7, 5, 4, 3]]

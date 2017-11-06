@@ -1,4 +1,4 @@
-'Calculation of the full plug-in distribuation'
+"""Calculation of the full plug-in distribuation"""
 
 import numpy as np
 import multiprocessing
