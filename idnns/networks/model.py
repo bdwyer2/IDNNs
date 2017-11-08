@@ -79,13 +79,12 @@ class Model:
             self.hidden, self.inputs, self.weights_all, self.biases_all = [], [], [], []
             last_hidden = self.x
             if self.covnet == 1:
-                y_conv, self._drouput, self.hidden, self.inputs = deepnn(self.x)
+                y_conv, self._dropout, self.hidden, self.inputs = deepnn(self.x)
             elif self.covnet == 2:
                 y_c, self.hidden, self.inputs = multi_layer_perceptron(self.x, self.input_size, self.num_of_classes,
                                                                        self.layerSize[0], self.layerSize[1])
             else:
-
-                self._drouput = 'dr'
+                self._dropout = 'dr'
                 # self.hidden.append(self.x)
                 for i in range(1, len(self.all_layer_sizes)):
                     name_scope = 'hidden' + str(i - 1)
@@ -105,8 +104,8 @@ class Model:
         return logits
 
     @lazy_property
-    def drouput(self):
-        return self._drouput
+    def dropout(self):
+        return self._dropout
 
     @property
     def optimize(self):

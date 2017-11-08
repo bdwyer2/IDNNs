@@ -2,14 +2,13 @@
 Calculate the information in the network
 Can be by the full distribution rule (for small network) or bt different approximation method
 """
-import multiprocessing
 import warnings
 import idnns.information.information_utilities as inf_ut
 from idnns.information.mutual_info_estimation import calc_varitional_information
+from idnns.information.mutual_information_calculation import *
 
 warnings.filterwarnings("ignore")
 NUM_CORES = multiprocessing.cpu_count()
-from idnns.information.mutual_information_calculation import *
 
 
 def calc_information_for_layer(data, bins, unique_inverse_x, unique_inverse_y, pxs, pys1):
@@ -73,7 +72,7 @@ def calc_information_for_layer_with_other(data, bins, unique_inverse_x, unique_i
 
 
 def calc_by_sampling_neurons(ws_iter_index, num_of_samples, label, sigma, bins, pxs):
-    iter_infomration = []
+    iter_information = []
     for j in range(len(ws_iter_index)):
         data = ws_iter_index[j]
         new_data = np.zeros((num_of_samples * data.shape[0], data.shape[1]))
@@ -92,10 +91,10 @@ def calc_by_sampling_neurons(ws_iter_index, num_of_samples, label, sigma, bins, 
         unique_array_y, unique_indices_y, unique_inverse_y, unique_counts_y = \
             np.unique(b_y, return_index=True, return_inverse=True, return_counts=True)
         pys1 = unique_counts_y / float(np.sum(unique_counts_y))
-        iter_infomration.append(
+        iter_information.append(
             calc_information_for_layer(data=new_data, bins=bins, unique_inverse_x=unique_inverse_x,
                                        unique_inverse_y=unique_inverse_y, pxs=pxs, pys1=pys1))
-        params = np.array(iter_infomration)
+        params = np.array(iter_information)
         return params
 
 
@@ -173,8 +172,8 @@ def extract_probs(label, x):
     return pys, pys1, p_y_given_x, b1, b, unique_a, unique_inverse_x, unique_inverse_y, pxs
 
 
-def get_information(ws, x, label, num_of_bins, interval_information_display, model, layerSize,
-                    calc_parallel=True, py_hats=0):
+def get_information(ws, x, label, num_of_bins, interval_information_display, model, layerSize, calc_parallel=True,
+                    py_hats=0):
     """Calculate the information for the network for all the epochs and all the layers"""
     print('Start calculating the information...')
     bins = np.linspace(-1, 1, num_of_bins)

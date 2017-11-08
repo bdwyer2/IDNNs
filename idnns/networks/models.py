@@ -102,7 +102,7 @@ def deepnn(x):
             h_fc1 = tf.nn.relu(input_fc1)
             tf.summary.histogram('activations', h_fc1)
 
-    with tf.name_scope('drouput'):
+    with tf.name_scope('dropout'):
         keep_prob = tf.placeholder(tf.float32)
         tf.summary.scalar('dropout_keep_probability', keep_prob)
         h_fc1_drop = tf.nn.dropout(h_fc1, keep_prob)

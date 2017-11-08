@@ -6,23 +6,22 @@ information plane and how it changes during the learning.
 <img src="https://github.com/ravidziv/IDNNs/blob/master/compare_percent_mnist_5_AND_85_PERCENT_old.JPG" width="1000px"/>
 
 ## Prerequisites
-- tensorflow r1.0 or higher version
-- numpy 1.11.0
-- matplotlib 2.0.2
-- multiprocessing
-- joblib
+- `tensorflow` r1.0 or higher version
+- `numpy` 1.11.0
+- `matplotlib` 2.0.2
+- `multiprocessing`
+- `joblib`
 
 ## Usage
 All the code is under the `idnns/` directory.
 For training a network and calculate the MI and the gradients of it run the an example in [main.py](main.py).
 Off course you can also run only specific methods for running only the training procedure/calculating the MI.
-This file has command-line arguments as follow - 
+This file has command-line arguments as follow -
  - `start_samples` - The number of the first sample for calculate the information
  - `batch_size` - The size of the batch
  - `learning_rate` - The learning rate of the network
  - `num_repeat` - The number of times to run the network
  - `num_epochs` - maximum number of epochs for training
-z
  - `per_data` - The percent of the training data
  - `name` - The name for saving the results
  - `data_name` - The dataset name
@@ -39,10 +38,10 @@ z
  - `rand_labels` - True if we want to set random labels
  - `data_dir` - The directory for finding the data
 The results are save under the folder jobs. Each run create a directory with a name that contains the run properties. In this directory there are the data.pickle file with the data of run and python file that is a copy of the file that create this run.
-The data is under the data directory. 
+The data is under the data directory.
 
-For plotting the results we have the file [plot_figures.py](idnns/plot/plot_figures.py). 
-This file contains methods for plotting diffrent aspects of the data (the information plane, the gradients,the norms, etc).
+For plotting the results we have the file [plot_figures.py](idnns/plot/plot_figures.py).
+This file contains methods for plotting different aspects of the data (the information plane, the gradients,the norms, etc).
 
 ## References
 

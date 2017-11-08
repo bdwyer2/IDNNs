@@ -3,6 +3,7 @@ import matplotlib.pyplot as plt
 import os
 import numpy as np
 import sys
+
 matplotlib.use("TkAgg")
 
 if sys.version_info >= (3, 0):
@@ -107,7 +108,7 @@ def update_axes_snr(axes, xlabel, ylabel):
 
 def adjust_axes(axes_log, axes_norms, p_0, p_1, f_log, f_norms, axes_snr=None, f_snr=None, p_3=None, axes_gaus=None,
                 f_gau=None, p_4=None, directory_name=''):
-    # adejust the figure according the specipic labels, scaling and legends
+    # adjust the figure according the specipic labels, scaling and legends
     # Change the log and log to linear if you want linear scaling
     # update_axes(reg_axes, '# Epochs', 'Normalized Mean and STD', [0, 10000], [0.000001, 10], '', 'log', 'log', [1, 10, 100, 1000, 10000], [0.00001, 0.0001, 0.001, 0.01, 0.1, 1, 10], p_0, p_1)
     title = 'The Mean and std of the gradients of each layer'

@@ -22,7 +22,7 @@ def build_model(activation_function, layerSize, input_size, num_of_classes, lear
     return model
 
 
-def train_and_calc_inf_network(i, j, k, layerSize, num_of_ephocs, learning_rate_local, batch_size, indexes, save_grads,
+def train_and_calc_inf_network(i, j, k, layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads,
                                data_sets_org,
                                model_type, percent_of_train, interval_accuracy_display, calc_information,
                                calc_information_last, num_of_bins,
@@ -30,29 +30,29 @@ def train_and_calc_inf_network(i, j, k, layerSize, num_of_ephocs, learning_rate_
     """Train the network and calculate it's information"""
     network_name = '{0}_{1}_{2}_{3}'.format(i, j, k, rand_int)
     print('Training network  - {0}'.format(network_name))
-    network = train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, indexes, save_grads,
+    network = train_network(layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads,
                             data_sets_org, model_type, percent_of_train, interval_accuracy_display, network_name,
                             cov_net)
     network['information'] = []
     if calc_information:
-        print('Calculating the infomration')
-        infomration = np.array([inn.get_information(network['ws'], data_sets_org.data, data_sets_org.labels,
+        print('Calculating the information')
+        information = np.array([inn.get_information(network['ws'], data_sets_org.data, data_sets_org.labels,
                                                     num_of_bins, interval_information_display, network['model'],
                                                     layerSize)])
-        network['information'] = infomration
+        network['information'] = information
     elif calc_information_last:
-        print('Calculating the infomration for the last epoch')
-        infomration = np.array([inn.get_information([network['ws'][-1]], data_sets_org.data, data_sets_org.labels,
+        print('Calculating the information for the last epoch')
+        information = np.array([inn.get_information([network['ws'][-1]], data_sets_org.data, data_sets_org.labels,
                                                     num_of_bins, interval_information_display,
                                                     network['model'], layerSize)])
-        network['information'] = infomration
+        network['information'] = information
     # If we don't want to save layer's output
     if not save_ws:
         network['weights'] = 0
     return network
 
 
-def exctract_activity(sess, batch_points_all, model, data_sets_org):
+def extract_activity(sess, batch_points_all, model, data_sets_org):
     """Get the activation values of the layers for the input"""
     w_temp = []
     for i in range(0, len(batch_points_all) - 1):
@@ -66,11 +66,11 @@ def exctract_activity(sess, batch_points_all, model, data_sets_org):
                 w_temp.append(w_temp_local[0][s])
             else:
                 w_temp[s] = np.concatenate((w_temp[s], w_temp_local[0][s]), axis=0)
-    """"
-      infomration[k] = inn.calc_information_for_epoch(k, interval_information_display, ws_t, params['bins'],
+    """
+      information[k] = inn.calc_information_for_epoch(k, interval_information_display, ws_t, params['bins'],
                                         params['unique_inverse_x'],
                                         params['unique_inverse_y'],
-                                        params['label'], estimted_labels,
+                                        params['label'], estimated_labels,
                                         params['b'], params['b1'], params['len_unique_a'],
                                         params['pys'], py_hats_temp, params['pxs'], params['py_x'],
                                         params['pys1'])
@@ -93,13 +93,12 @@ def print_accuracy(batch_points_test, data_sets, model, sess, j, acc_train_array
                                                                               np.mean(np.array(acc_train_array))))
 
 
-def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, indexes, save_grads,
-                  data_sets_org, model_type, percent_of_train, interval_accuracy_display,
-                  name, covn_net):
+def train_network(layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads, data_sets_org,
+                  model_type, percent_of_train, interval_accuracy_display, name, covn_net):
     """Train the network"""
     tf.reset_default_graph()
     data_sets = data_shuffle(data_sets_org, percent_of_train)
-    ws, estimted_label, gradients, infomration, models, weights = [[None] * len(indexes) for _ in range(6)]
+    ws, estimated_label, gradients, information, models, weights = [[None] * len(indexes) for _ in range(6)]
     loss_func_test, loss_func_train, test_prediction, train_prediction = [np.zeros((len(indexes))) for _ in range(4)]
     input_size = data_sets_org.data.shape[1]
     num_of_classes = data_sets_org.labels.shape[1]
@@ -125,10 +124,10 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
         # Go over the epochs
         k = 0
         acc_train_array = []
-        for j in range(0, num_of_ephocs):
+        for j in range(0, num_of_epochs):
             epochs_grads = []
             if j in indexes:
-                ws[k] = exctract_activity(sess, batch_points_all, model, data_sets_org)
+                ws[k] = extract_activity(sess, batch_points_all, model, data_sets_org)
             # Print accuracy
             if np.mod(j, interval_accuracy_display) == 1 or interval_accuracy_display == 1:
                 print_accuracy(batch_points_test, data_sets, model, sess, j, acc_train_array)
@@ -143,8 +142,7 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
                 acc_train_array.append(tr_err)
                 if j in indexes:
                     epochs_grads_temp, loss_tr, weights_local = sess.run(
-                        [grads, model.cross_entropy, model.weights_all],
-                        feed_dict=feed_dict)
+                        [grads, model.cross_entropy, model.weights_all], feed_dict=feed_dict)
                     epochs_grads.append(epochs_grads_temp)
                     for ii in range(len(current_weights)):
                         current_weights[ii].append(weights_local[ii])
@@ -158,8 +156,8 @@ def train_network(layerSize, num_of_ephocs, learning_rate_local, batch_size, ind
                 # Save the model
                 write_meta = True if k == 0 else False
                 # saver.save(sess, model.save_file, global_step=k, write_meta_graph=write_meta)
-                print(">>> file writer")
-                tf.summary.FileWriter(os.path.join("/home/brendan", "train"), tf.get_default_graph())
+                # ### print(">>> file writer")
+                # ### tf.summary.FileWriter(os.path.join("/home/brendan", "train"), tf.get_default_graph())
                 k += 1
     network = {}
     network['ws'] = ws

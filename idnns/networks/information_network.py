@@ -4,7 +4,7 @@ import os
 import numpy as np
 from joblib import Parallel, delayed
 import idnns.networks.network as nn
-from idnns.information import information_process  as inn
+from idnns.information import information_process as inn
 from idnns.plots import plot_figures as plt_fig
 from idnns.networks import network_paramters as netp
 from idnns.networks.utils import load_data
@@ -15,15 +15,15 @@ NUM_CORES = multiprocessing.cpu_count()
 
 
 class informationNetwork():
-    """A class that store the network, train it and calc it's information (can be several of networks) """
+    """A class that store the network, train it and calc it's information (can be several of networks)"""
 
     def __init__(self, rand_int=0, num_of_samples=None, args=None):
-        if args == None:
+        if args is None:
             args = netp.get_default_parser(num_of_samples)
         self.cov_net = args.cov_net
         self.calc_information = args.calc_information
         self.run_in_parallel = args.run_in_parallel
-        self.num_ephocs = args.num_ephocs
+        self.num_epochs = args.num_epochs
         self.learning_rate = args.learning_rate
         self.batch_size = args.batch_size
         self.activation_function = args.activation_function
@@ -39,9 +39,9 @@ class informationNetwork():
         self.layers_sizes = netp.select_network_arch(args.net_type)
         # The percents of the train data samples
         self.train_samples = np.linspace(1, 100, 199)[[[x * 2 - 2 for x in index] for index in args.inds]]
-        # The indexs that we want to calculate the information for them in logspace interval
+        # The indexes that we want to calculate the information for them in logspace interval
         self.epochs_indexes = np.unique(
-            np.logspace(np.log2(args.start_samples), np.log2(args.num_ephocs), args.num_of_samples, dtype=int,
+            np.logspace(np.log2(args.start_samples), np.log2(args.num_epochs), args.num_of_samples, dtype=int,
                         base=2)) - 1
         max_size = np.max([len(layers_size) for layers_size in self.layers_sizes])
         # load data
@@ -57,22 +57,22 @@ class informationNetwork():
 
         params = {'sampleLen': len(self.train_samples),
                   'nDistSmpls': args.nDistSmpls,
-                  'layerSizes': ",".join(str(i) for i in self.layers_sizes[0]), 'nEpoch': args.num_ephocs,
+                  'layerSizes': ",".join(str(i) for i in self.layers_sizes[0]), 'nEpoch': args.num_epochs,
                   'batch': args.batch_size,
                   'nRepeats': args.num_of_repeats, 'nEpochInds': len(self.epochs_indexes),
                   'LastEpochsInds': self.epochs_indexes[-1], 'DataName': args.data_name,
                   'lr': args.learning_rate}
 
         self.name_to_save = args.name + "_" + "_".join([str(i) + '=' + str(params[i]) for i in params])
-        params['train_samples'], params['CPUs'], params[
-            'directory'], params['epochsInds'] = self.train_samples, NUM_CORES, self.name_to_save, self.epochs_indexes
+        params['train_samples'], params['CPUs'], params['directory'], params['epochsInds'] = \
+            self.train_samples, NUM_CORES, self.name_to_save, self.epochs_indexes
         self.params = params
         self.rand_int = rand_int
         # If we trained already the network
         self.traind_network = False
 
     def save_data(self, parent_dir='jobs/', file_to_save='data.pickle'):
-        """Save the data to the file """
+        """Save the data to the file"""
         directory = '{0}/{1}{2}/'.format(os.getcwd(), parent_dir, self.params['directory'])
 
         data = {'information': self.information,
@@ -91,7 +91,7 @@ class informationNetwork():
         if self.run_in_parallel:
             results = Parallel(n_jobs=NUM_CORES)(delayed(nn.train_network)
                                                  (self.layers_sizes[j],
-                                                  self.num_ephocs, self.learning_rate, self.batch_size,
+                                                  self.num_epochs, self.learning_rate, self.batch_size,
                                                   self.epochs_indexes, self.save_grads, self.data_sets,
                                                   self.activation_function,
                                                   self.train_samples, self.interval_accuracy_display,
@@ -105,7 +105,7 @@ class informationNetwork():
         else:
             results = [nn.train_and_calc_inf_network(i, j, k,
                                                      self.layers_sizes[j],
-                                                     self.num_ephocs, self.learning_rate, self.batch_size,
+                                                     self.num_epochs, self.learning_rate, self.batch_size,
                                                      self.epochs_indexes, self.save_grads, self.data_sets,
                                                      self.activation_function,
                                                      self.train_samples, self.interval_accuracy_display,

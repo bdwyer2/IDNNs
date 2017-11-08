@@ -1,8 +1,10 @@
 import numpy as np
 num = 1
+
+
 def KL(a, b):
-    """Calculate the Kullback Leibler divergence between a and b """
-    D_KL = np.nansum(np.multiply(a, np.log(np.divide(a, b+np.spacing(1)))), axis=1)
+    """Calculate the Kullback Leibler divergence between a and b"""
+    D_KL = np.nansum(np.multiply(a, np.log(np.divide(a, b + np.spacing(1)))), axis=1)
     return D_KL
 
 

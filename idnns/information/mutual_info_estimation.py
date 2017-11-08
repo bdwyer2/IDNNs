@@ -4,6 +4,7 @@ import tensorflow as tf
 from idnns.networks import model as mo
 import contextlib
 
+
 @contextlib.contextmanager
 def printoptions(*args, **kwargs):
     original = np.get_printoptions()
@@ -33,7 +34,7 @@ def estimate_IY_by_network(data, labels, from_layer=0):
             if from_layer < 5:
                 optimizer = model.optimize
             init = tf.global_variables_initializer()
-            num_of_ephocs = 50
+            num_of_epochs = 50
             batch_size = 51
             batch_points = np.rint(np.arange(0, data.shape[0] + 1, batch_size)).astype(dtype=np.int32)
             if data.shape[0] not in batch_points:
@@ -41,13 +42,13 @@ def estimate_IY_by_network(data, labels, from_layer=0):
         with tf.Session(graph=g1) as sess:
             sess.run(init)
             if from_layer < 5:
-                for j in range(0, num_of_ephocs):
+                for j in range(0, num_of_epochs):
                     for i in range(0, len(batch_points) - 1):
                         batch_xs = data[batch_points[i]:batch_points[i + 1], :]
                         batch_ys = labels[batch_points[i]:batch_points[i + 1], :]
                         feed_dict = {model.x: batch_xs, model.labels: batch_ys}
                         if cov_net == 1:
-                            feed_dict[model.drouput] = 0.5
+                            feed_dict[model.dropout] = 0.5
                         optimizer.run(feed_dict)
             p_y_given_t_i = []
             batch_size = 256
@@ -59,7 +60,7 @@ def estimate_IY_by_network(data, labels, from_layer=0):
                 batch_ys = labels[batch_points[i]:batch_points[i + 1], :]
                 feed_dict = {model.x: batch_xs, model.labels: batch_ys}
                 if cov_net == 1:
-                    feed_dict[model.drouput] = 1
+                    feed_dict[model.dropout] = 1
                 p_y_given_t_i_local, acc = sess.run([model.prediction, model.accuracy],
                                                     feed_dict=feed_dict)
                 acc_all.append(acc)
@@ -108,7 +109,7 @@ def calc_varitional_information(data, labels, model_path, layer_numer, num_of_la
                                                                               np.array(I_XT).flatten(), I_TY, acc))
     sys.stdout.flush()
 
-    # I_est = mutual_inform[ation((data, labels[:, 0][:, None]), PYs, k=ks)
+    # I_est = mutual_information((data, labels[:, 0][:, None]), PYs, k=ks)
     # I_est,I_XT = 0, 0
     params = {}
     # params['DKL_YgX_YgT'] = DKL_YgX_YgT
