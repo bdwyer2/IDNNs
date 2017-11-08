@@ -1,6 +1,6 @@
 import numpy as np
 from tensorflow.examples.tutorials.mnist import input_data
-import scipy.io as sio
+import scipy.io
 import os
 import sys
 
@@ -18,7 +18,7 @@ def load_data(name, random_labels=False):
         data_sets.data = np.concatenate((data_sets_temp.train.images, data_sets_temp.test.images), axis=0)
         data_sets.labels = np.concatenate((data_sets_temp.train.labels, data_sets_temp.test.labels), axis=0)
     else:
-        d = sio.loadmat(os.path.join(os.path.dirname(sys.argv[0]), name + '.mat'))
+        d = scipy.io.loadmat(os.path.join(os.path.dirname(sys.argv[0]), name + '.mat'))
         F = d['F']
         y = d['y']
         C = type('type_C', (object,), {})

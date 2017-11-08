@@ -1,7 +1,7 @@
 import numpy as np
 import sys
 import tensorflow as tf
-from idnns.networks import model as mo
+import idnns.networks.model
 import contextlib
 
 
@@ -29,8 +29,8 @@ def estimate_IY_by_network(data, labels, from_layer=0):
         with g1.as_default():
             # For each epoch and for each layer we calculate the best decoder - we train a 2 layer network
             cov_net = 4
-            model = mo.Model(input_size, [400, 100, 50], labels.shape[1], 0.0001, '', cov_net=cov_net,
-                             from_layer=from_layer)
+            model = idnns.networks.model.Model(input_size, [400, 100, 50], labels.shape[1], 0.0001, '',
+                                               cov_net=cov_net, from_layer=from_layer)
             if from_layer < 5:
                 optimizer = model.optimize
             init = tf.global_variables_initializer()

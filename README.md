@@ -3,7 +3,7 @@
 IDNNs is a python library that implements training and calculating of information in deep neural networks
 [\[Shwartz-Ziv & Tishby, 2017\]](#IDNNs) in TensorFlow. The library allows you to investigate how networks look on the
 information plane and how it changes during the learning.
-<img src="https://github.com/ravidziv/IDNNs/blob/master/compare_percent_mnist_5_AND_85_PERCENT_old.JPG" width="1000px"/>
+<img src="./compare_percent_mnist_5_AND_85_PERCENT_old.JPG" width="1000px"/>
 
 ## Prerequisites
 - `tensorflow` r1.0 or higher version
@@ -37,12 +37,17 @@ This file has command-line arguments as follow -
  - `cov_net` - True if we want covnet
  - `rand_labels` - True if we want to set random labels
  - `data_dir` - The directory for finding the data
-The results are save under the folder jobs. Each run create a directory with a name that contains the run properties. In this directory there are the data.pickle file with the data of run and python file that is a copy of the file that create this run.
+The results are save under the folder jobs. Each run create a directory with a name that contains the run properties. In
+this directory there are the data.pickle file with the data of run and python file that is a copy of the file that
+create this run.
+
 The data is under the data directory.
 
 For plotting the results we have the file [plot_figures.py](idnns/plot/plot_figures.py).
-This file contains methods for plotting different aspects of the data (the information plane, the gradients,the norms, etc).
+This file contains methods for plotting different aspects of the data (the information plane, the gradients, the norms,
+etc).
 
 ## References
 
-1. <a name="IDNNs"></a> Ravid. Shwartz-Ziv, Naftali Tishby, [Opening the Black Box of Deep Neural Networks via Information](https://arxiv.org/abs/1703.00810), 2017, Arxiv.
+1. <a name="IDNNs"></a> Ravid. Shwartz-Ziv, Naftali Tishby,
+[Opening the Black Box of Deep Neural Networks via Information](https://arxiv.org/abs/1703.00810), 2017, Arxiv.

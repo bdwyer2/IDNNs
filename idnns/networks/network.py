@@ -1,12 +1,11 @@
 """Train and calculate the information of network"""
 import multiprocessing
-import os
 import warnings
 import numpy as np
 import tensorflow as tf
 from idnns.information import information_process as inn
-from idnns.networks.utils import data_shuffle
-from idnns.networks import model as mo
+import idnns.networks.utils
+import idnns.networks.model
 
 warnings.filterwarnings("ignore")
 summaries_dir = 'summaries'
@@ -17,16 +16,15 @@ def build_model(activation_function, layerSize, input_size, num_of_classes, lear
     """Build specipic model of the network
     Return the network model
     """
-    model = mo.Model(input_size, layerSize, num_of_classes, learning_rate_local, save_file, int(activation_function),
-                     cov_net=covn_net)
+    model = idnns.networks.model.Model(input_size, layerSize, num_of_classes, learning_rate_local, save_file,
+                                       int(activation_function), cov_net=covn_net)
     return model
 
 
 def train_and_calc_inf_network(i, j, k, layerSize, num_of_epochs, learning_rate_local, batch_size, indexes, save_grads,
-                               data_sets_org,
-                               model_type, percent_of_train, interval_accuracy_display, calc_information,
-                               calc_information_last, num_of_bins,
-                               interval_information_display, save_ws, rand_int, cov_net):
+                               data_sets_org, model_type, percent_of_train, interval_accuracy_display, calc_information,
+                               calc_information_last, num_of_bins, interval_information_display, save_ws, rand_int,
+                               cov_net):
     """Train the network and calculate it's information"""
     network_name = '{0}_{1}_{2}_{3}'.format(i, j, k, rand_int)
     print('Training network  - {0}'.format(network_name))
@@ -43,8 +41,8 @@ def train_and_calc_inf_network(i, j, k, layerSize, num_of_epochs, learning_rate_
     elif calc_information_last:
         print('Calculating the information for the last epoch')
         information = np.array([inn.get_information([network['ws'][-1]], data_sets_org.data, data_sets_org.labels,
-                                                    num_of_bins, interval_information_display,
-                                                    network['model'], layerSize)])
+                                                    num_of_bins, interval_information_display, network['model'],
+                                                    layerSize)])
         network['information'] = information
     # If we don't want to save layer's output
     if not save_ws:
@@ -59,8 +57,7 @@ def extract_activity(sess, batch_points_all, model, data_sets_org):
         batch_xs = data_sets_org.data[batch_points_all[i]:batch_points_all[i + 1]]
         batch_ys = data_sets_org.labels[batch_points_all[i]:batch_points_all[i + 1]]
         feed_dict_temp = {model.x: batch_xs, model.labels: batch_ys}
-        w_temp_local = sess.run([model.hidden_layers],
-                                feed_dict=feed_dict_temp)
+        w_temp_local = sess.run([model.hidden_layers], feed_dict=feed_dict_temp)
         for s in range(len(w_temp_local[0])):
             if i == 0:
                 w_temp.append(w_temp_local[0][s])
@@ -86,8 +83,7 @@ def print_accuracy(batch_points_test, data_sets, model, sess, j, acc_train_array
         batch_xs = data_sets.test.data[batch_points_test[i]:batch_points_test[i + 1]]
         batch_ys = data_sets.test.labels[batch_points_test[i]:batch_points_test[i + 1]]
         feed_dict_temp = {model.x: batch_xs, model.labels: batch_ys}
-        acc = sess.run([model.accuracy],
-                       feed_dict=feed_dict_temp)
+        acc = sess.run([model.accuracy], feed_dict=feed_dict_temp)
         acc_array.append(acc)
     print('Epoch {0} - Test Accuracy: {1:.3f} Train Accuracy: {2:.3f}'.format(j, np.mean(np.array(acc_array)),
                                                                               np.mean(np.array(acc_train_array))))
@@ -97,7 +93,7 @@ def train_network(layerSize, num_of_epochs, learning_rate_local, batch_size, ind
                   model_type, percent_of_train, interval_accuracy_display, name, covn_net):
     """Train the network"""
     tf.reset_default_graph()
-    data_sets = data_shuffle(data_sets_org, percent_of_train)
+    data_sets = idnns.networks.utils.data_shuffle(data_sets_org, percent_of_train)
     ws, estimated_label, gradients, information, models, weights = [[None] * len(indexes) for _ in range(6)]
     loss_func_test, loss_func_train, test_prediction, train_prediction = [np.zeros((len(indexes))) for _ in range(4)]
     input_size = data_sets_org.data.shape[1]
@@ -115,7 +111,7 @@ def train_network(layerSize, num_of_epochs, learning_rate_local, batch_size, ind
     # Build the network
     model = build_model(model_type, layerSize, input_size, num_of_classes, learning_rate_local, name, covn_net)
     optimizer = model.optimize
-    saver = tf.train.Saver(max_to_keep=0)
+    _ = tf.train.Saver(max_to_keep=0)
     init = tf.global_variables_initializer()
     grads = tf.gradients(model.cross_entropy, tf.trainable_variables())
     # Train the network

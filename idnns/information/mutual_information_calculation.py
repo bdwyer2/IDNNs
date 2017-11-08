@@ -1,4 +1,4 @@
-"""Calculation of the full plug-in distribuation"""
+"""Calculation of the full plug-in distribution"""
 
 import numpy as np
 import multiprocessing
@@ -19,7 +19,7 @@ def calc_entropy_for_specipic_t(current_ts, px_i):
     return H2X
 
 
-def calc_condtion_entropy(px, t_data, unique_inverse_x):
+def calc_condition_entropy(px, t_data, unique_inverse_x):
     # Condition entropy of t given x
     H2X_array = np.array(
         Parallel(n_jobs=NUM_CORES)(delayed(calc_entropy_for_specipic_t)(t_data[unique_inverse_x == i, :], px[i])
@@ -28,23 +28,11 @@ def calc_condtion_entropy(px, t_data, unique_inverse_x):
     return H2X
 
 
-def calc_information_from_mat(px, py, ps2, data, unique_inverse_x, unique_inverse_y, unique_array):
+def calc_information_from_mat(px, py, ps2, data, unique_inverse_x, unique_inverse_y):
     """Calculate the MI based on binning of the data"""
     H2 = -np.sum(ps2 * np.log2(ps2))
-    H2X = calc_condtion_entropy(px, data, unique_inverse_x)
-    H2Y = calc_condtion_entropy(py.T, data, unique_inverse_y)
+    H2X = calc_condition_entropy(px, data, unique_inverse_x)
+    H2Y = calc_condition_entropy(py.T, data, unique_inverse_y)
     IY = H2 - H2Y
     IX = H2 - H2X
     return IX, IY
-
-
-def calc_probs(t_index, unique_inverse, label, b, b1, len_unique_a):
-    """Calculate the p(x|T) and p(y|T)"""
-    indexs = unique_inverse == t_index
-    p_y_ts = np.sum(label[indexs], axis=0) / label[indexs].shape[0]
-    unique_array_internal, unique_counts_internal = \
-        np.unique(b[indexs], return_index=False, return_inverse=False, return_counts=True)
-    indexes_x = np.where(np.in1d(b1, b[indexs]))
-    p_x_ts = np.zeros(len_unique_a)
-    p_x_ts[indexes_x] = unique_counts_internal / float(sum(unique_counts_internal))
-    return p_x_ts, p_y_ts

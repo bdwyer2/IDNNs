@@ -1,8 +1,9 @@
 import functools
 import numpy as np
 from idnns.networks.models import multi_layer_perceptron
-from idnns.networks.models import deepnn
+import idnns.networks.models
 from idnns.networks.ops import *
+import tensorflow as tf
 
 
 def lazy_property(function):
@@ -11,7 +12,6 @@ def lazy_property(function):
     @property
     @functools.wraps(function)
     def decorator(self):
-        # print hasattr(self, attribute)
         if not hasattr(self, attribute):
             setattr(self, attribute, function(self))
         return getattr(self, attribute)
@@ -41,11 +41,8 @@ class Model:
             self.activation_function = None
         else:
             self.activation_function = tf.nn.tanh
-        self.prediction
-        self.optimize
-        self.accuracy
 
-    def initilizae_layer(self, name_scope, row_size, col_size, activation_function, last_hidden):
+    def initialize_layer(self, name_scope, row_size, col_size, activation_function, last_hidden):
         # Build layer of the network with weights and biases
         weights = get_scope_variable(name_scope=name_scope, var="weights",
                                      shape=[row_size, col_size],
@@ -79,7 +76,7 @@ class Model:
             self.hidden, self.inputs, self.weights_all, self.biases_all = [], [], [], []
             last_hidden = self.x
             if self.covnet == 1:
-                y_conv, self._dropout, self.hidden, self.inputs = deepnn(self.x)
+                y_conv, self._dropout, self.hidden, self.inputs = idnns.networks.models.deepnn(self.x)
             elif self.covnet == 2:
                 y_c, self.hidden, self.inputs = multi_layer_perceptron(self.x, self.input_size, self.num_of_classes,
                                                                        self.layerSize[0], self.layerSize[1])
@@ -90,12 +87,12 @@ class Model:
                     name_scope = 'hidden' + str(i - 1)
                     row_size, col_size = self.all_layer_sizes[i - 1], self.all_layer_sizes[i]
                     activation_function = self.activation_function
-                    last_hidden = self.initilizae_layer(name_scope, row_size, col_size, activation_function,
+                    last_hidden = self.initialize_layer(name_scope, row_size, col_size, activation_function,
                                                         last_hidden)
                 name_scope = 'final_layer'
                 row_size, col_size = self.layerSize[-1], self.num_of_classes
                 activation_function = tf.nn.softmax
-                last_hidden = self.initilizae_layer(name_scope, row_size, col_size, activation_function, last_hidden)
+                _ = self.initialize_layer(name_scope, row_size, col_size, activation_function, last_hidden)
         return self.hidden
 
     @lazy_property
